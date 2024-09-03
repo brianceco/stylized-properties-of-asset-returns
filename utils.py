@@ -71,6 +71,26 @@ def cross_corr(S_1: pd.Series, S_2: pd.Series, max_lags: int = None, match_indic
     return np.array(rho)
 
 def uncalibrated_GARCH(params: list, var_0: float, ser: pd.Series) -> pd.Series:
+    """Given a list of paramater variables [alpha_0, alpha_1, beta_0], an initial estimate sigma^2_1 = `var_0`, and a series `ser` of asset return innovations, return a series of the GARCH(1,1) volatility 
+    
+    sigma_t^2 = alpha_0 + alpha_1 ser.iloc[t-1]^2 + beta_0 sigma_{t-1}
+    
+    of the return process.
+    
+    Parameters
+    ----------
+    params: List of floats [alpha_0, alpha_1, beta_0] corresponding to the parameters of the GARCH(1,1) model.
+    
+    var_0: Float corresponding to the initial value sigma_t^2 of the 
+    
+    ser: Pandas Series of floats corresponding to an asset return innovation series 
+    
+    m_t = r_t - E[r_t|F_{t-1}]. 
+
+    Returns
+    -------
+    Pandas series of floats with index ser.index corresponding to the GARCH(1,1) volatility of the series `ser`.
+    """
     [alpha_0, alpha_1, beta] = params
     var_t = [var_0]
     for t in range(1, ser.size):
@@ -79,6 +99,24 @@ def uncalibrated_GARCH(params: list, var_0: float, ser: pd.Series) -> pd.Series:
     return pd.Series(var_t, index=ser.index, name='GARCH (in-sample)')
 
 def GARCH(params: list, var_0: float, index: pd.DatetimeIndex) -> pd.Series:
+    """Given a list of paramater variables [alpha_0, alpha_1, beta_0], an initial estimate sigma^2_1 = `var_0`, and an pd.DatetimeIndex `index`, return a series of the GARCH(1,1) volatility series
+    
+    sigma_t^2 = alpha_0 + alpha_1 m_t^2 + beta_0 sigma_{t-1}
+    
+    over the DatetimeIndex `index`, where the innovation sequence follows a standard normal, m_t ~ Norm(0,1).
+    
+    Parameters
+    ----------
+    params: List of floats [alpha_0, alpha_1, beta_0] corresponding to the parameters of the GARCH(1,1) model.
+    
+    var_0: Float corresponding to the initial value sigma_t^2 of the 
+    
+    index: Pandas DatetimeIndex corresponding to the index of the return innovation series.
+
+    Returns
+    -------
+    Pandas series of floats with index ser.index corresponding to the GARCH(1,1) volatility of the innovation sequence following a standard normal distribtuion.
+    """
     [alpha_0, alpha_1, beta] = params
     var_t = [var_0]
     for t in range(1, index.size):
